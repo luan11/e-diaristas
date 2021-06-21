@@ -6,11 +6,17 @@ import TextField from 'ui/components/inputs/TextField/TextField';
 
 export interface TextFieldMaskProps extends OutlinedTextFieldProps {
   mask: string;
+  value: string;
 }
 
-function TextFieldMask({ mask, ...props }: TextFieldMaskProps) {
+function TextFieldMask({
+  mask,
+  value,
+  onChange,
+  ...props
+}: TextFieldMaskProps) {
   return (
-    <InputMask mask={mask}>
+    <InputMask mask={mask} value={value} onChange={onChange}>
       {() => {
         return <TextField {...props} />;
       }}

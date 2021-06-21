@@ -3,7 +3,12 @@ import PageTitle from 'ui/components/data-display/PageTitle/PageTitle';
 import UserInformation from 'ui/components/data-display/UserInformation/UserInformation';
 import TextFieldMask from 'ui/components/inputs/TextFieldMask/TextFieldMask';
 
-import { Button, Typography, Container } from '@material-ui/core';
+import {
+  Button,
+  Typography,
+  Container,
+  CircularProgress,
+} from '@material-ui/core';
 
 import {
   FormElementsContainer,
@@ -11,7 +16,21 @@ import {
   ProfessionalsContainer,
 } from 'ui/styles/pages/index.style';
 
+import useIndex from 'data/hooks/pages/useIndex.page';
+
 export default function Home() {
+  const {
+    cep,
+    setCep,
+    validCep,
+    search,
+    error,
+    professionals,
+    hasSearched,
+    loading,
+    remainingProfessionals,
+  } = useIndex();
+
   return (
     <div>
       <SafeEnvironment />
@@ -30,57 +49,65 @@ export default function Home() {
             label="Digite seu CEP"
             fullWidth
             variant={'outlined'}
+            value={cep}
+            onChange={(event) => setCep(event.target.value)}
           />
-          <Typography color={'error'}>CEP inválido</Typography>
+
+          {error && <Typography color={'error'}>{error}</Typography>}
+
           <Button
             variant={'contained'}
             color={'secondary'}
             sx={{ width: '220px' }}
+            disabled={!validCep || loading}
+            onClick={() => search(cep)}
           >
-            Buscar
+            {loading ? <CircularProgress size={20} /> : 'Buscar'}
           </Button>
         </FormElementsContainer>
 
-        <ProfessionalsPaper>
-          <ProfessionalsContainer>
-            <UserInformation
-              picture="https://github.com/luan11.png"
-              name="Luan Novais"
-              rating={4}
-              description="Guarulhos"
-            />
-            <UserInformation
-              picture=""
-              name="John Doe"
-              rating={2}
-              description="São Paulo"
-            />
-            <UserInformation
-              picture=""
-              name="John Doe"
-              rating={2}
-              description="São Paulo"
-            />
-            <UserInformation
-              picture=""
-              name="John Doe"
-              rating={2}
-              description="São Paulo"
-            />
-            <UserInformation
-              picture=""
-              name="John Doe"
-              rating={2}
-              description="São Paulo"
-            />
-            <UserInformation
-              picture=""
-              name="John Doe"
-              rating={2}
-              description="São Paulo"
-            />
-          </ProfessionalsContainer>
-        </ProfessionalsPaper>
+        {hasSearched &&
+          (professionals.length > 0 ? (
+            <ProfessionalsPaper>
+              <ProfessionalsContainer>
+                {professionals.map(
+                  (
+                    { nome_completo, foto_usuario, reputacao, cidade },
+                    index
+                  ) => (
+                    <UserInformation
+                      key={index}
+                      picture={foto_usuario}
+                      name={nome_completo}
+                      rating={reputacao}
+                      description={cidade}
+                    />
+                  )
+                )}
+              </ProfessionalsContainer>
+
+              <Container sx={{ textAlign: 'center' }}>
+                {remainingProfessionals > 0 && (
+                  <Typography sx={{ mt: 5 }}>
+                    ... e mais {remainingProfessionals} profissionais atendem
+                    seu endereço
+                  </Typography>
+                )}
+
+                <Button
+                  variant={'contained'}
+                  color={'secondary'}
+                  sx={{ mt: 5 }}
+                >
+                  Contratar
+                </Button>
+              </Container>
+            </ProfessionalsPaper>
+          ) : (
+            <Typography align={'center'} color={'textPrimary'}>
+              Ainda não temos nenhuma diarista disponível em sua região
+            </Typography>
+          ))}
       </Container>
     </div>
   );
